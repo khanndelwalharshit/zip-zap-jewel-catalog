@@ -22,51 +22,91 @@ import {
   Settings,
   Crown,
   Diamond,
-  Star
+  Star,
+  UserCog,
+  BarChart3,
+  Shield,
+  Database
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const menuItems = [
   {
     title: "Dashboard",
     url: "/",
     icon: LayoutDashboard,
-    group: "main"
+    group: "main",
+    badge: null
+  },
+  {
+    title: "Admin Users",
+    url: "/admin-users",
+    icon: UserCog,
+    group: "main",
+    badge: "5"
   },
   {
     title: "Categories",
     url: "/categories",
     icon: FolderTree,
-    group: "catalog"
+    group: "catalog",
+    badge: "24"
   },
   {
     title: "Products",
     url: "/products", 
     icon: Package,
-    group: "catalog"
+    group: "catalog",
+    badge: "2.4K"
   },
   {
     title: "Customers",
     url: "/customers",
     icon: Users,
-    group: "management"
+    group: "management",
+    badge: "1.8K"
   },
   {
     title: "Catalogs",
     url: "/catalogs",
     icon: BookOpen,
-    group: "management"
+    group: "management",
+    badge: "156"
   },
   {
     title: "Inquiries",
     url: "/inquiries",
     icon: MessageSquare,
-    group: "management"
+    group: "management",
+    badge: "47"
+  },
+  {
+    title: "Analytics",
+    url: "/analytics",
+    icon: BarChart3,
+    group: "system",
+    badge: null
+  },
+  {
+    title: "Security",
+    url: "/security",
+    icon: Shield,
+    group: "system",
+    badge: null
+  },
+  {
+    title: "Database",
+    url: "/database",
+    icon: Database,
+    group: "system",
+    badge: null
   },
   {
     title: "Settings",
     url: "/settings",
     icon: Settings,
-    group: "system"
+    group: "system",
+    badge: null
   }
 ];
 
@@ -117,7 +157,16 @@ const AppSidebar = () => {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && (
+                        <div className="flex items-center justify-between flex-1">
+                          <span>{item.title}</span>
+                          {item.badge && (
+                            <Badge variant="secondary" className="text-xs ml-2">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -141,7 +190,16 @@ const AppSidebar = () => {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && (
+                        <div className="flex items-center justify-between flex-1">
+                          <span>{item.title}</span>
+                          {item.badge && (
+                            <Badge variant="secondary" className="text-xs ml-2">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -164,7 +222,16 @@ const AppSidebar = () => {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && (
+                        <div className="flex items-center justify-between flex-1">
+                          <span>{item.title}</span>
+                          {item.badge && (
+                            <Badge variant="secondary" className="text-xs ml-2">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -187,7 +254,16 @@ const AppSidebar = () => {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && (
+                        <div className="flex items-center justify-between flex-1">
+                          <span>{item.title}</span>
+                          {item.badge && (
+                            <Badge variant="secondary" className="text-xs ml-2">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -195,6 +271,17 @@ const AppSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Version Footer */}
+        {!collapsed && (
+          <div className="mt-auto p-4 border-t border-border">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">ZipZag Catalog v2.1</p>
+              <p className="text-xs text-muted-foreground">React 18.2 Stable</p>
+              <Badge variant="outline" className="text-xs mt-2">Production Ready</Badge>
+            </div>
+          </div>
+        )}
       </SidebarContent>
     </Sidebar>
   );

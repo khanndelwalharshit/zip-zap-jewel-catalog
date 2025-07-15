@@ -10,47 +10,129 @@ import {
   TrendingUp,
   Crown,
   Star,
-  Diamond
+  Diamond,
+  ShoppingBag,
+  Eye,
+  Clock
 } from "lucide-react";
 import heroImage from "@/assets/jewelry-dashboard-hero.jpg";
+import jewelryCollection from "@/assets/jewelry-collection.jpg";
+import goldBracelet from "@/assets/gold-bracelet.jpg";
+import diamondRing from "@/assets/diamond-ring.jpg";
+import pearlNecklace from "@/assets/pearl-necklace.jpg";
 
 const Dashboard = () => {
   const stats = [
     {
       title: "Total Customers",
-      value: "1,234",
-      change: "+12%",
+      value: "1,847",
+      change: "+18%",
       icon: Users,
-      color: "text-primary"
+      color: "text-primary",
+      description: "Premium jewelry clients"
     },
     {
       title: "Active Products",
-      value: "456",
-      change: "+8%", 
+      value: "2,456",
+      change: "+12%", 
       icon: Package,
-      color: "text-success"
+      color: "text-success",
+      description: "Jewelry items in catalog"
     },
     {
       title: "Live Catalogs",
-      value: "89",
-      change: "+15%",
+      value: "156",
+      change: "+24%",
       icon: BookOpen,
-      color: "text-gold"
+      color: "text-gold",
+      description: "Personalized collections"
     },
     {
       title: "Pending Inquiries",
-      value: "23",
-      change: "-5%",
+      value: "47",
+      change: "+8%",
       icon: MessageSquare,
-      color: "text-warning"
+      color: "text-warning",
+      description: "Customer inquiries"
     }
   ];
 
   const recentActivity = [
-    { type: "catalog", message: "New catalog created for Premium Jewels Ltd", time: "2 hours ago", status: "success" },
-    { type: "inquiry", message: "Inquiry received for 22K Gold Bracelet", time: "4 hours ago", status: "pending" },
-    { type: "product", message: "Diamond Ring collection updated", time: "6 hours ago", status: "info" },
-    { type: "customer", message: "New customer registration: Sarah Johnson", time: "1 day ago", status: "success" },
+    { 
+      type: "catalog", 
+      message: "Luxury Diamond Collection catalog created for Pristine Jewelers Mumbai", 
+      time: "1 hour ago", 
+      status: "success",
+      customer: "Pristine Jewelers",
+      icon: BookOpen
+    },
+    { 
+      type: "inquiry", 
+      message: "Product inquiry: 22K Gold Bridal Set by customer Rajesh Kumar", 
+      time: "2 hours ago", 
+      status: "pending",
+      customer: "Rajesh Kumar",
+      icon: MessageSquare
+    },
+    { 
+      type: "product", 
+      message: "New Diamond Earrings collection added - 18 items", 
+      time: "3 hours ago", 
+      status: "info",
+      customer: "System",
+      icon: Diamond
+    },
+    { 
+      type: "customer", 
+      message: "New premium customer registered: Golden Palace Jewelers", 
+      time: "5 hours ago", 
+      status: "success",
+      customer: "Golden Palace Jewelers",
+      icon: Users
+    },
+    { 
+      type: "catalog", 
+      message: "Bridal Collection catalog shared with Shree Ganesh Jewelers", 
+      time: "8 hours ago", 
+      status: "info",
+      customer: "Shree Ganesh Jewelers",
+      icon: Star
+    },
+    { 
+      type: "inquiry", 
+      message: "Bulk order inquiry for Temple Jewelry collection", 
+      time: "1 day ago", 
+      status: "pending",
+      customer: "Heritage Jewels",
+      icon: MessageSquare
+    }
+  ];
+
+  const featuredProducts = [
+    {
+      id: 1,
+      name: "22K Gold Bracelet",
+      category: "Bracelets",
+      price: "₹45,000",
+      image: goldBracelet,
+      status: "bestseller"
+    },
+    {
+      id: 2,
+      name: "Diamond Engagement Ring",
+      category: "Rings",
+      price: "₹125,000", 
+      image: diamondRing,
+      status: "new"
+    },
+    {
+      id: 3,
+      name: "Pearl Necklace Set",
+      category: "Necklaces",
+      price: "₹35,000",
+      image: pearlNecklace,
+      status: "trending"
+    }
   ];
 
   return (
@@ -95,7 +177,8 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground flex items-center mt-1">
+              <p className="text-xs text-muted-foreground mb-1">{stat.description}</p>
+              <p className="text-xs text-muted-foreground flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 {stat.change} from last month
               </p>
@@ -105,7 +188,7 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
         {/* Quick Actions */}
         <Card className="shadow-card">
           <CardHeader>
@@ -115,19 +198,19 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="premium" className="w-full justify-start">
+            <Button variant="premium" className="w-full justify-start" size="sm">
               <FolderTree className="mr-2 h-4 w-4" />
               Manage Categories
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button variant="outline" className="w-full justify-start" size="sm">
               <Package className="mr-2 h-4 w-4" />
               Add New Product
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button variant="outline" className="w-full justify-start" size="sm">
               <Users className="mr-2 h-4 w-4" />
               Customer Management
             </Button>
-            <Button variant="gold" className="w-full justify-start">
+            <Button variant="gold" className="w-full justify-start" size="sm">
               <BookOpen className="mr-2 h-4 w-4" />
               Create Catalog
             </Button>
@@ -135,30 +218,116 @@ const Dashboard = () => {
         </Card>
 
         {/* Recent Activity */}
-        <Card className="lg:col-span-2 shadow-card">
+        <Card className="lg:col-span-3 shadow-card">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              Recent Activity
+              <Badge variant="outline" className="text-xs">Live Updates</Badge>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 max-h-96 overflow-y-auto">
               {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      activity.status === 'success' ? 'bg-success' :
-                      activity.status === 'pending' ? 'bg-warning' : 'bg-primary'
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                  <div className="flex-shrink-0">
+                    <activity.icon className={`h-5 w-5 ${
+                      activity.status === 'success' ? 'text-success' :
+                      activity.status === 'pending' ? 'text-warning' : 'text-primary'
                     }`} />
-                    <div>
-                      <p className="text-sm font-medium">{activity.message}</p>
-                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{activity.message}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-xs text-muted-foreground flex items-center">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {activity.time}
+                      </p>
+                      <Badge variant="outline" className="text-xs">
+                        {activity.customer}
+                      </Badge>
                     </div>
                   </div>
                   <Badge variant={
                     activity.status === 'success' ? 'default' :
                     activity.status === 'pending' ? 'secondary' : 'outline'
-                  }>
+                  } className="text-xs">
                     {activity.status}
                   </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Featured Products Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-gold" />
+              Collection Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <img 
+              src={jewelryCollection} 
+              alt="Jewelry Collection" 
+              className="w-full h-48 object-cover rounded-lg mb-4"
+            />
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Categories</span>
+                <span className="font-medium">24</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Active Products</span>
+                <span className="font-medium">2,456</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Total Value</span>
+                <span className="font-medium text-primary">₹12.5 Cr</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Featured Products */}
+        <Card className="lg:col-span-3 shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Featured Products
+              <Button variant="outline" size="sm">
+                <Eye className="mr-2 h-4 w-4" />
+                View All
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {featuredProducts.map((product) => (
+                <div key={product.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="relative">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-full h-32 object-cover rounded-lg mb-3"
+                    />
+                    <Badge 
+                      variant={product.status === 'bestseller' ? 'default' : 'secondary'} 
+                      className="absolute top-2 right-2 text-xs"
+                    >
+                      {product.status}
+                    </Badge>
+                  </div>
+                  <h4 className="font-medium text-sm mb-1">{product.name}</h4>
+                  <p className="text-xs text-muted-foreground mb-2">{product.category}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-primary">{product.price}</span>
+                    <Button variant="outline" size="sm">
+                      <ShoppingBag className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
