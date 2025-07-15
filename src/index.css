@@ -2,39 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ZipZag Catalog System - Jewelry Admin Design System */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Jewelry Brand Colors */
+    --background: 0 0% 98%;
+    --foreground: 215 25% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 25% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Premium Navy Primary */
+    --primary: 215 30% 25%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 215 35% 35%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Elegant Gold Accent */
+    --secondary: 45 95% 85%;
+    --secondary-foreground: 215 30% 25%;
+    
+    /* Luxury Gold */
+    --gold: 45 100% 50%;
+    --gold-foreground: 215 30% 25%;
+    
+    /* Sophisticated Grays */
+    --muted: 215 15% 95%;
+    --muted-foreground: 215 20% 50%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 45 95% 90%;
+    --accent-foreground: 215 30% 25%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Status Colors */
+    --success: 145 70% 35%;
+    --success-foreground: 0 0% 98%;
+    
+    --warning: 35 100% 55%;
+    --warning-foreground: 0 0% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders & Inputs */
+    --border: 215 20% 88%;
+    --input: 215 20% 92%;
+    --ring: 215 30% 25%;
+
+    /* Jewelry Specific */
+    --jewelry-platinum: 0 0% 85%;
+    --jewelry-silver: 0 0% 75%;
+    --jewelry-rose-gold: 15 50% 70%;
+    
+    /* Premium Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(215 30% 25%), hsl(215 35% 35%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 100% 50%), hsl(45 90% 60%));
+    --gradient-elegant: linear-gradient(180deg, hsl(0 0% 98%), hsl(215 15% 95%));
+    
+    /* Shadows */
+    --shadow-elegant: 0 4px 20px -2px hsl(215 30% 25% / 0.1);
+    --shadow-gold: 0 4px 20px -2px hsl(45 100% 50% / 0.2);
+    --shadow-card: 0 2px 10px -2px hsl(215 20% 50% / 0.1);
+    
+    /* Animations */
+    --transition-elegant: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 0.5rem;
 
