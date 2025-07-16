@@ -155,7 +155,10 @@ const AppSidebar = () => {
               {groupedItems.main.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
+                    <NavLink 
+                      to={item.url} 
+                      className={({ isActive }) => getNavClass({ isActive })}
+                    >
                       <item.icon className="h-5 w-5" />
                       {!collapsed && (
                         <div className="flex items-center justify-between flex-1">
@@ -188,7 +191,10 @@ const AppSidebar = () => {
               {groupedItems.catalog.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
+                    <NavLink 
+                      to={item.url} 
+                      className={({ isActive }) => getNavClass({ isActive })}
+                    >
                       <item.icon className="h-5 w-5" />
                       {!collapsed && (
                         <div className="flex items-center justify-between flex-1">
@@ -220,7 +226,10 @@ const AppSidebar = () => {
               {groupedItems.management.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
+                    <NavLink 
+                      to={item.url} 
+                      className={({ isActive }) => getNavClass({ isActive })}
+                    >
                       <item.icon className="h-5 w-5" />
                       {!collapsed && (
                         <div className="flex items-center justify-between flex-1">
@@ -252,7 +261,10 @@ const AppSidebar = () => {
               {groupedItems.system.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
+                    <NavLink 
+                      to={item.url} 
+                      className={({ isActive }) => getNavClass({ isActive })}
+                    >
                       <item.icon className="h-5 w-5" />
                       {!collapsed && (
                         <div className="flex items-center justify-between flex-1">
