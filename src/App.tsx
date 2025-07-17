@@ -6,9 +6,15 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AdminUsers from "./pages/AdminUsers";
 import Categories from "./pages/Categories";
+import AddCategory from "./pages/AddCategory";
+import EditCategory from "./pages/EditCategory";
 import Products from "./pages/Products";
+import AddProduct from "./pages/AddProduct";
+import EditProduct from "./pages/EditProduct";
 import Customers from "./pages/Customers";
 import Catalogs from "./pages/Catalogs";
+import AddCatalog from "./pages/AddCatalog";
+import EditCatalog from "./pages/EditCatalog";
 import Inquiries from "./pages/Inquiries";
 import NotFound from "./pages/NotFound";
 
@@ -24,9 +30,15 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/admin-users" element={<AdminUsers />} />
           <Route path="/categories" element={<Categories />} />
+          <Route path="/categories/add" element={<AddCategory />} />
+          <Route path="/categories/edit/:id" element={<EditCategory />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/products/add" element={<AddProduct />} />
+          <Route path="/products/edit/:id" element={<EditProduct />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/catalogs" element={<Catalogs />} />
+          <Route path="/catalogs/add" element={<AddCatalog />} />
+          <Route path="/catalogs/edit/:id" element={<EditCatalog />} />
           <Route path="/inquiries" element={<Inquiries />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

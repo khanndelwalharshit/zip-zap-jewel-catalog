@@ -1,4 +1,5 @@
 import Layout from "@/components/layout/Layout";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { BookOpen, Plus, Edit, Trash2, Eye, Lock, Users, Package, Share } from "lucide-react";
 
 const Catalogs = () => {
+  const navigate = useNavigate();
   const catalogs = [
     {
       id: 1,

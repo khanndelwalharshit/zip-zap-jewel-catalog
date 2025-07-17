@@ -1,4 +1,5 @@
 import Layout from "@/components/layout/Layout";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Package, Plus, Edit, Trash2, Eye, Star, TrendingUp } from "lucide-react";
 
 const Products = () => {
+  const navigate = useNavigate();
   const products = [
     {
       id: 1,
