@@ -94,7 +94,10 @@ const Categories = () => {
             <h1 className="text-3xl font-bold text-foreground">Categories</h1>
             <p className="text-muted-foreground">Manage product categories with n-level nesting support</p>
           </div>
-          <Button className="bg-gradient-primary">
+          <Button 
+            className="bg-gradient-primary"
+            onClick={() => navigate("/categories/add")}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add Category
           </Button>
