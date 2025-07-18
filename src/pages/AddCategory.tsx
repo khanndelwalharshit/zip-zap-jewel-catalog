@@ -24,6 +24,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const AddCategory = () => {
+  console.log("AddCategory component is rendering");
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -69,9 +70,14 @@ const AddCategory = () => {
     { id: "4", name: "Earrings" },
   ];
 
+  console.log("About to render AddCategory");
+  
   return (
     <Layout>
       <div className="space-y-6">
+        <h1>Add Category Page Test</h1>
+        <p>If you can see this, the component is working</p>
+        
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button 
