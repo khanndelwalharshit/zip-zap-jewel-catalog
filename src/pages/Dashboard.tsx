@@ -1,3 +1,4 @@
+import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -136,7 +137,8 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-elegant">
+    <Layout>
+      <div className="space-y-6">
       {/* Hero Section */}
       <div className="relative h-64 overflow-hidden rounded-lg mb-8">
         <img 
@@ -334,7 +336,8 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
