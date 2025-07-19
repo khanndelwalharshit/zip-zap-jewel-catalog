@@ -115,7 +115,9 @@ const AddProduct = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Form */}
           <div className="lg:col-span-2 space-y-6">
             <Card>
@@ -126,112 +128,110 @@ const AddProduct = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    {/* Product Name */}
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Product Name *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., 22K Gold Chain Necklace" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                <div className="space-y-6">
+                  {/* Product Name */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Product Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., 22K Gold Chain Necklace" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    {/* Category */}
-                    <FormField
-                      control={form.control}
-                      name="categoryId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {categories.map((category) => (
-                                <SelectItem key={category.id} value={category.id}>
-                                  {category.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Short Description */}
-                    <FormField
-                      control={form.control}
-                      name="shortDescription"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Short Description</FormLabel>
+                  {/* Category */}
+                  <FormField
+                    control={form.control}
+                    name="categoryId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <Input 
-                              placeholder="Brief product summary (max 100 chars)"
-                              {...field}
-                            />
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
                           </FormControl>
-                          <div className="text-xs text-muted-foreground">
-                            {field.value?.length || 0}/100 characters
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Short Description */}
+                  <FormField
+                    control={form.control}
+                    name="shortDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Short Description</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Brief product summary (max 100 chars)"
+                            {...field}
+                          />
+                        </FormControl>
+                        <div className="text-xs text-muted-foreground">
+                          {field.value?.length || 0}/100 characters
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Long Description */}
+                  <FormField
+                    control={form.control}
+                    name="longDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Detailed Description *</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Detailed product description including materials, craftsmanship, and features..."
+                            className="min-h-[120px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Status */}
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Active Status</FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            Enable this product to be visible in catalogs
                           </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Long Description */}
-                    <FormField
-                      control={form.control}
-                      name="longDescription"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Detailed Description *</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Detailed product description including materials, craftsmanship, and features..."
-                              className="min-h-[120px]"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Status */}
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">Active Status</FormLabel>
-                            <div className="text-sm text-muted-foreground">
-                              Enable this product to be visible in catalogs
-                            </div>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -359,24 +359,26 @@ const AddProduct = () => {
           </div>
         </div>
 
-        {/* Submit Buttons */}
-        <div className="flex justify-end gap-4 lg:col-span-3">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => navigate("/products")}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={form.handleSubmit(onSubmit)} 
-            disabled={isLoading} 
-            className="gap-2"
-          >
-            <Save className="h-4 w-4" />
-            {isLoading ? "Creating..." : "Create Product"}
-          </Button>
-        </div>
+            {/* Submit Buttons */}
+            <div className="flex justify-end gap-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => navigate("/products")}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                disabled={isLoading} 
+                className="gap-2"
+              >
+                <Save className="h-4 w-4" />
+                {isLoading ? "Creating..." : "Create Product"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </Layout>
   );
