@@ -141,7 +141,7 @@ const AddCategory = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">No Parent (Top Level)</SelectItem>
+                            <SelectItem value="none">No Parent (Top Level)</SelectItem>
                             {parentCategories.map((category) => (
                               <SelectItem key={category.id} value={category.id}>
                                 {category.name}
