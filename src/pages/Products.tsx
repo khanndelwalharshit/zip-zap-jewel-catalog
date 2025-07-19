@@ -96,7 +96,7 @@ const Products = () => {
             <h1 className="text-3xl font-bold text-foreground">Products</h1>
             <p className="text-muted-foreground">Manage jewelry products and their catalog associations</p>
           </div>
-          <Button className="bg-gradient-primary">
+          <Button className="bg-gradient-primary" onClick={() => navigate("/products/add")}>
             <Plus className="h-4 w-4 mr-2" />
             Add Product
           </Button>

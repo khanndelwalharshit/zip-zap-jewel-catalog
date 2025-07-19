@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { UserCog, Plus, Edit, Trash2, Shield, Crown } from "lucide-react";
 
 const AdminUsers = () => {
+  const navigate = useNavigate();
   const adminUsers = [
     {
       id: 1,
@@ -53,7 +55,7 @@ const AdminUsers = () => {
             <h1 className="text-3xl font-bold text-foreground">Admin Users</h1>
             <p className="text-muted-foreground">Manage system administrators and their permissions</p>
           </div>
-          <Button className="bg-gradient-primary">
+          <Button className="bg-gradient-primary" onClick={() => navigate("/admin-users/add")}>
             <Plus className="h-4 w-4 mr-2" />
             Add Admin User
           </Button>

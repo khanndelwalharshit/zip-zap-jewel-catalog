@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AdminUsers from "./pages/AdminUsers";
+import AddAdminUser from "./pages/AddAdminUser";
 import Categories from "./pages/Categories";
 import AddCategory from "./pages/AddCategory";
 import EditCategory from "./pages/EditCategory";
@@ -29,6 +30,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/admin-users" element={<AdminUsers />} />
+          <Route path="/admin-users/add" element={<AddAdminUser />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/categories/add" element={<AddCategory />} />
           <Route path="/categories/edit/:id" element={<EditCategory />} />
