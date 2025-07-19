@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AdminUsers from "./pages/AdminUsers";
 import AddAdminUser from "./pages/AddAdminUser";
+import EditAdminUser from "./pages/EditAdminUser";
 import Categories from "./pages/Categories";
 import AddCategory from "./pages/AddCategory";
 import EditCategory from "./pages/EditCategory";
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/admin-users" element={<AdminUsers />} />
           <Route path="/admin-users/add" element={<AddAdminUser />} />
+          <Route path="/admin-users/edit/:id" element={<EditAdminUser />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/categories/add" element={<AddCategory />} />
           <Route path="/categories/edit/:id" element={<EditCategory />} />
