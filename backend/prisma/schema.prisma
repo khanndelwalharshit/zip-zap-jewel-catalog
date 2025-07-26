@@ -1,0 +1,189 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  password    String
+  role        Role     @default(ADMIN)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastLogin   DateTime?
+
+  @@map("admin_users")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  name             String
+  shortDescription String
+  longDescription  String
+  basePrice        Decimal  @db.Decimal(10, 2)
+  offerPercent     Int      @default(0)
+  sku              String?  @unique
+  weight           Decimal? @db.Decimal(8, 3)
+  material         String?
+  purity           String?
+  isActive         Boolean  @default(true)
+  isFeatured       Boolean  @default(false)
+  stockQuantity    Int      @default(0)
+  minQuantity      Int      @default(1)
+  maxQuantity      Int?
+  tags             String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Foreign Keys
+  categoryId       String
+  
+  // Relations
+  category         Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  images           ProductImage[]
+  catalogProducts  CatalogProduct[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  altText   String?
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  // Foreign Keys
+  productId String
+
+  // Relations
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  phone       String?
+  address     String?
+  city        String?
+  state       String?
+  pincode     String?
+  country     String   @default("India")
+  isActive    Boolean  @default(true)
+  preferences Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  catalogs    Catalog[]
+  inquiries   Inquiry[]
+
+  @@map("customers")
+}
+
+model Catalog {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isPublic    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  validUntil  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Foreign Keys
+  customerId  String
+
+  // Relations
+  customer         Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  catalogProducts  CatalogProduct[]
+
+  @@map("catalogs")
+}
+
+model CatalogProduct {
+  id          String   @id @default(cuid())
+  customPrice Decimal? @db.Decimal(10, 2)
+  notes       String?
+  addedAt     DateTime @default(now())
+
+  // Foreign Keys
+  catalogId   String
+  productId   String
+
+  // Relations
+  catalog     Catalog @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([catalogId, productId])
+  @@map("catalog_products")
+}
+
+model Inquiry {
+  id          String        @id @default(cuid())
+  subject     String
+  message     String
+  status      InquiryStatus @default(PENDING)
+  priority    Priority      @default(MEDIUM)
+  response    String?
+  respondedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Foreign Keys
+  customerId  String
+
+  // Relations
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("inquiries")
+}
+
+// Enums
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  VIEWER
+}
+
+enum InquiryStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
