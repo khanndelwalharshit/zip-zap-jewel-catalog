@@ -1,0 +1,87 @@
+# =================================================================
+# ZipZag Catalog System - Backend Environment Configuration
+# =================================================================
+
+# Server Configuration
+NODE_ENV=development
+PORT=3000
+API_VERSION=v1
+CORS_ORIGIN=http://localhost:5173
+
+# Database Configuration
+DATABASE_URL=postgresql://zipzag_user:zipzag_password@localhost:5432/zipzag_catalog_db
+
+# JWT Authentication
+JWT_SECRET=your-ultra-secure-jwt-secret-key-min-32-chars
+JWT_REFRESH_SECRET=your-ultra-secure-refresh-secret-key-min-32-chars
+JWT_EXPIRE_TIME=15m
+JWT_REFRESH_EXPIRE_TIME=7d
+
+# Redis Configuration (for caching and sessions)
+REDIS_URL=redis://localhost:6379
+REDIS_PASSWORD=
+REDIS_DB=0
+
+# AWS S3 Configuration (for file storage)
+AWS_ACCESS_KEY_ID=your-aws-access-key-id
+AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
+AWS_REGION=us-east-1
+S3_BUCKET=zipzag-jewelry-images
+S3_CDN_URL=https://your-cloudfront-url.com
+
+# Email Configuration (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-specific-password
+FROM_EMAIL=noreply@zipzag.com
+FROM_NAME=ZipZag Catalog System
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+RATE_LIMIT_SKIP_SUCCESSFUL_REQUESTS=false
+
+# File Upload Configuration
+MAX_FILE_SIZE=5242880
+ALLOWED_IMAGE_TYPES=image/jpeg,image/png,image/webp
+UPLOAD_PATH=uploads/
+
+# Security Configuration
+BCRYPT_SALT_ROUNDS=12
+SESSION_SECRET=your-session-secret-key
+COOKIE_SECRET=your-cookie-secret-key
+
+# Logging Configuration
+LOG_LEVEL=info
+LOG_FILE_PATH=logs/app.log
+LOG_MAX_SIZE=20m
+LOG_MAX_FILES=14d
+
+# Application URLs
+FRONTEND_URL=http://localhost:5173
+BACKEND_URL=http://localhost:3000
+PUBLIC_CATALOG_BASE_URL=http://localhost:3000/public/catalogs
+
+# Business Configuration
+DEFAULT_PAGINATION_LIMIT=20
+MAX_PAGINATION_LIMIT=100
+CATALOG_PASSWORD_MIN_LENGTH=6
+PRODUCT_IMAGE_MAX_COUNT=10
+
+# External Services
+ANALYTICS_API_KEY=your-analytics-api-key
+PAYMENT_GATEWAY_KEY=your-payment-gateway-key
+SMS_SERVICE_API_KEY=your-sms-service-key
+
+# Development/Testing
+DEBUG_QUERIES=false
+ENABLE_SWAGGER=true
+MOCK_EXTERNAL_SERVICES=false
+
+# Production Security (uncomment for production)
+# HTTPS_ONLY=true
+# SECURE_COOKIES=true
+# CSRF_PROTECTION=true
+# HELMET_ENABLED=true
