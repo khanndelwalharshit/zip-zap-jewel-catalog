@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -11,7 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+
+import { userService } from "@/services/userService";
 import Layout from "@/components/layout/Layout";
+
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -44,19 +48,25 @@ const AddAdminUser = () => {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // Map form fields to backend expected payload
+      const payload = {
+        name: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        role: data.role,
+        active: data.status,
+      };
+      await userService.create(payload);
       toast({
         title: "Success",
         description: "Admin user created successfully",
       });
-      
       navigate("/admin-users");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to create admin user",
+        description: error?.message || "Failed to create admin user",
         variant: "destructive",
       });
     } finally {
@@ -160,8 +170,8 @@ const AddAdminUser = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="sub-admin">Sub Admin</SelectItem>
                             <SelectItem value="super-admin">Super Admin</SelectItem>
+                            <SelectItem value="sub-admin">Sub Admin</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

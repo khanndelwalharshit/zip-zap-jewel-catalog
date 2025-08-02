@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
+import { customerService } from "@/services/customerService";
+import { productService } from "@/services/productService";
+import { catalogService } from "@/services/catalogService";
 
 const formSchema = z.object({
   name: z.string().min(2, "Catalog name must be at least 2 characters"),
@@ -26,17 +29,19 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface Product {
-  id: string;
+  id: number;
   name: string;
   price: number;
-  category: string;
-  image: string;
+  category: { name: string };
+  image?: string;
 }
 
 const AddCatalog = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -53,6 +58,26 @@ const AddCatalog = () => {
 
   const hasPassword = form.watch("hasPassword");
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [customersRes, productsRes] = await Promise.all([
+          customerService.getAll(),
+          productService.getAll(),
+        ]);
+        setCustomers(customersRes.data || []);
+        setAllProducts(productsRes.data || []);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load customers or products",
+          variant: "destructive",
+        });
+      }
+    };
+    fetchData();
+  }, [toast]);
+
   const onSubmit = async (data: FormData) => {
     if (selectedProducts.length === 0) {
       toast({
@@ -65,8 +90,16 @@ const AddCatalog = () => {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const payload = {
+        name: data.name,
+        customerId: parseInt(data.customerId),
+        hasPassword: data.hasPassword,
+        password: data.hasPassword ? data.password : undefined,
+        status: data.status ? "active" : "inactive",
+        productIds: selectedProducts.map(p => p.id) // Send product IDs
+      };
+
+      await catalogService.create(payload);
       
       toast({
         title: "Success",
@@ -74,34 +107,16 @@ const AddCatalog = () => {
       });
       
       navigate("/catalogs");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to create catalog",
+        description: error?.message || "Failed to create catalog",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Sample customers for dropdown
-  const customers = [
-    { id: "1", name: "Rajesh Kumar", email: "rajesh@example.com" },
-    { id: "2", name: "Priya Sharma", email: "priya@example.com" },
-    { id: "3", name: "Amit Patel", email: "amit@example.com" },
-    { id: "4", name: "Sneha Reddy", email: "sneha@example.com" },
-  ];
-
-  // Sample products
-  const allProducts: Product[] = [
-    { id: "1", name: "22K Gold Chain", price: 45000, category: "Necklaces", image: "/placeholder.svg" },
-    { id: "2", name: "Diamond Ring", price: 125000, category: "Rings", image: "/placeholder.svg" },
-    { id: "3", name: "Pearl Necklace", price: 35000, category: "Necklaces", image: "/placeholder.svg" },
-    { id: "4", name: "Gold Bracelet", price: 28000, category: "Bracelets", image: "/placeholder.svg" },
-    { id: "5", name: "Ruby Earrings", price: 65000, category: "Earrings", image: "/placeholder.svg" },
-    { id: "6", name: "Emerald Pendant", price: 85000, category: "Pendants", image: "/placeholder.svg" },
-  ];
 
   const filteredProducts = allProducts.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -112,7 +127,7 @@ const AddCatalog = () => {
     setSelectedProducts([...selectedProducts, product]);
   };
 
-  const removeProduct = (productId: string) => {
+  const removeProduct = (productId: number) => {
     setSelectedProducts(selectedProducts.filter(p => p.id !== productId));
   };
 
@@ -236,6 +251,7 @@ const AddCatalog = () => {
                                 type="password"
                                 placeholder="Enter password for catalog access"
                                 {...field}
+                                autoComplete="new-password"
                               />
                             </FormControl>
                             <FormMessage />
@@ -289,7 +305,7 @@ const AddCatalog = () => {
                       <div key={product.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
                           <img
-                            src={product.image}
+                            src={product.image || "/placeholder.svg"}
                             alt={product.name}
                             className="w-12 h-12 object-cover rounded"
                           />
@@ -297,7 +313,7 @@ const AddCatalog = () => {
                             <p className="font-medium">{product.name}</p>
                             <div className="flex items-center gap-2">
                               <Badge variant="secondary" className="text-xs">
-                                {product.category}
+                                {product.category.name}
                               </Badge>
                               <span className="text-sm font-semibold text-primary">
                                 ₹{product.price.toLocaleString()}
@@ -349,7 +365,7 @@ const AddCatalog = () => {
                       <div key={product.id} className="flex items-center justify-between p-2 border rounded-lg hover:bg-muted/50">
                         <div className="flex items-center gap-2">
                           <img
-                            src={product.image}
+                            src={product.image || "/placeholder.svg"}
                             alt={product.name}
                             className="w-8 h-8 object-cover rounded"
                           />
@@ -357,7 +373,7 @@ const AddCatalog = () => {
                             <p className="text-sm font-medium truncate">{product.name}</p>
                             <div className="flex items-center gap-1">
                               <Badge variant="outline" className="text-xs">
-                                {product.category}
+                                {product.category.name}
                               </Badge>
                               <span className="text-xs text-primary font-semibold">
                                 ₹{product.price.toLocaleString()}

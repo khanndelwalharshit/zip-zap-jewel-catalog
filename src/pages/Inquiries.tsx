@@ -3,66 +3,74 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { MessageSquare, Plus, Edit, Trash2, Eye, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { inquiryService } from "@/services/inquiryService";
+import { useToast } from "@/hooks/use-toast";
+import { InquiryFormModal } from "@/components/InquiryFormModal";
 
 const Inquiries = () => {
-  const inquiries = [
-    {
-      id: 1,
-      customerName: "Pristine Jewelers Mumbai",
-      catalogName: "Premium Diamond Collection 2024",
-      productName: "Classic Diamond Solitaire Ring",
-      message: "Can you provide more details about the diamond's clarity and certification? Also interested in bulk pricing for 5+ pieces.",
-      status: "pending",
-      createdAt: "2024-07-15",
-      customerEmail: "orders@pristinejewelers.com",
-      priority: "high"
-    },
-    {
-      id: 2,
-      customerName: "Golden Palace Jewelers",
-      catalogName: "Traditional Gold Jewelry",
-      productName: "22K Gold Traditional Necklace",
-      message: "What is the weight of this necklace? Do you have similar designs in different weights?",
-      status: "responded",
-      createdAt: "2024-07-14",
-      customerEmail: "info@goldenpalace.in",
-      priority: "medium"
-    },
-    {
-      id: 3,
-      customerName: "Royal Gems & Jewelry",
-      catalogName: "Wedding Collection Special",
-      productName: "Pearl Drop Earrings",
-      message: "These earrings are perfect for our upcoming bridal collection. Can we schedule a meeting to discuss wholesale rates?",
-      status: "pending",
-      createdAt: "2024-07-13",
-      customerEmail: "sales@royalgems.co.in",
-      priority: "high"
-    },
-    {
-      id: 4,
-      customerName: "Diamond Dreams Chennai",
-      catalogName: "Festive Collection 2024",
-      productName: "Emerald Tennis Bracelet",
-      message: "Is this piece available in different sizes? Also need information about the emerald origin and quality grading.",
-      status: "closed",
-      createdAt: "2024-07-12",
-      customerEmail: "contact@diamonddreams.in",
-      priority: "low"
-    },
-    {
-      id: 5,
-      customerName: "Heritage Jewels Kolkata",
-      catalogName: "Silver Jewelry Showcase",
-      productName: "Platinum Wedding Band",
-      message: "Can you customize this design in silver instead of platinum? Looking for cost-effective alternatives.",
-      status: "responded",
-      createdAt: "2024-07-10",
-      customerEmail: "heritage@jewelskolkata.com",
-      priority: "medium"
+  const { toast } = useToast();
+  const [inquiries, setInquiries] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [deleteLoadingId, setDeleteLoadingId] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [selectedInquiry, setSelectedInquiry] = useState<any | null>(null);
+
+  const fetchInquiries = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await inquiryService.getAll();
+      setInquiries(res.data || []);
+    } catch (err: any) {
+      setError(err?.message || "Failed to fetch inquiries");
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchInquiries();
+  }, []);
+
+  const handleDelete = async (inquiryId: number) => {
+    setDeleteLoadingId(inquiryId);
+    try {
+      await inquiryService.delete(inquiryId);
+      toast({
+        title: "Success",
+        description: "Inquiry deleted successfully.",
+      });
+      fetchInquiries(); // Refresh the list
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err?.message || "Failed to delete inquiry.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteLoadingId(null);
+    }
+  };
+
+  const handleOpenModal = (mode: 'create' | 'edit', inquiry: any = null) => {
+    setModalMode(mode);
+    setSelectedInquiry(inquiry);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedInquiry(null);
+  };
+
+  const handleSuccess = () => {
+    fetchInquiries();
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -100,7 +108,7 @@ const Inquiries = () => {
             <h1 className="text-3xl font-bold text-foreground">Inquiries</h1>
             <p className="text-muted-foreground">Manage customer product inquiries and responses</p>
           </div>
-          <Button className="bg-gradient-primary">
+          <Button className="bg-gradient-primary" onClick={() => handleOpenModal('create')}>
             <Plus className="h-4 w-4 mr-2" />
             Manual Inquiry
           </Button>
@@ -177,9 +185,9 @@ const Inquiries = () => {
                   <TableRow key={inquiry.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{inquiry.customerName}</div>
-                        <div className="text-sm text-muted-foreground">{inquiry.customerEmail}</div>
-                        <div className="text-xs text-muted-foreground">via {inquiry.catalogName}</div>
+                        <div className="font-medium">{inquiry.customer?.name}</div>
+                        <div className="text-sm text-muted-foreground">{inquiry.customer?.email}</div>
+                        <div className="text-xs text-muted-foreground">via {inquiry.catalog?.name}</div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -203,18 +211,40 @@ const Inquiries = () => {
                         {inquiry.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm">{inquiry.createdAt}</TableCell>
+                    <TableCell className="text-sm">{new Date(inquiry.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleOpenModal('edit', inquiry)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleOpenModal('edit', inquiry)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="outline">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="outline" disabled={deleteLoadingId === inquiry.id}>
+                              {deleteLoadingId === inquiry.id ? (
+                                <span className="animate-spin"><Trash2 className="h-4 w-4" /></span>
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Inquiry</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this inquiry? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(inquiry.id)} disabled={deleteLoadingId === inquiry.id}>
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -224,6 +254,13 @@ const Inquiries = () => {
           </CardContent>
         </Card>
       </div>
+      <InquiryFormModal
+        mode={modalMode}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        inquiry={selectedInquiry}
+        onSuccess={handleSuccess}
+      />
     </Layout>
   );
 };

@@ -137,7 +137,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <Layout>
+    
       <div className="space-y-6">
       {/* Hero Section */}
       <div className="relative h-64 overflow-hidden rounded-lg mb-8">
@@ -337,7 +337,7 @@ const Dashboard = () => {
         </Card>
       </div>
       </div>
-    </Layout>
+    
   );
 };
 

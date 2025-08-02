@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,8 @@ import { Switch } from "@/components/ui/switch";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
+import { categoryService } from "@/services/categoryService";
+import { productService } from "@/services/productService";
 
 const formSchema = z.object({
   name: z.string().min(2, "Product name must be at least 2 characters"),
@@ -31,6 +33,7 @@ const AddProduct = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [productImages, setProductImages] = useState<string[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -45,11 +48,36 @@ const AddProduct = () => {
     },
   });
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await categoryService.getAll();
+        setCategories(res.data || []);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load categories",
+          variant: "destructive",
+        });
+      }
+    };
+    fetchCategories();
+  }, [toast]);
+
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const payload = {
+        name: data.name,
+        shortDescription: data.shortDescription,
+        description: data.longDescription,
+        basePrice: data.basePrice,
+        offerPercentage: data.offerPercentage || 0,
+        categoryId: parseInt(data.categoryId),
+        active: data.status,
+      };
+
+      await productService.create(payload);
       
       toast({
         title: "Success",
@@ -57,25 +85,16 @@ const AddProduct = () => {
       });
       
       navigate("/products");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to create product",
+        description: error?.message || "Failed to create product",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Sample categories for dropdown
-  const categories = [
-    { id: "1", name: "Rings" },
-    { id: "2", name: "Necklaces" },
-    { id: "3", name: "Bracelets" },
-    { id: "4", name: "Earrings" },
-    { id: "5", name: "Pendants" },
-  ];
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;

@@ -1,88 +1,114 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { ArrowLeft, Save, FolderTree } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useEffect, useState } from "react";
+import { useForm, Controller, FormProvider } from "react-hook-form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormControl,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { categoryService } from "@/services/categoryService";
 import Layout from "@/components/layout/Layout";
+import { ArrowLeft, Save, FolderTree } from "lucide-react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router-dom";
+
+interface Category {
+  id: number;
+  name: string;
+}
 
 const formSchema = z.object({
   name: z.string().min(2, "Category name must be at least 2 characters"),
   description: z.string().optional(),
-  parentId: z.string().optional(),
-  status: z.boolean().default(true),
+  active: z.boolean().default(true),
+  parentId: z.union([z.string(), z.literal("none-parent")]).transform((val) =>
+    val === "none-parent" ? null : Number(val)
+  ),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 const AddCategory = () => {
-  console.log("AddCategory component is rendering");
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<FormData>({
+  const methods = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
-      parentId: "",
-      status: true,
+      active: true,
+      parentId: null,
     },
   });
 
+  const {
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors, isSubmitting },
+  } = methods;
+
+  const [parentCategories, setParentCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await categoryService.getAll();
+        setParentCategories(res.data || []);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        setParentCategories([]);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   const onSubmit = async (data: FormData) => {
-    setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Success",
-        description: "Category created successfully",
+      await categoryService.create({
+        name: data.name,
+        description: data.description,
+        active: data.active,
+        parentId: data.parentId,
       });
-      
-      navigate("/categories");
+      toast.success("Category added successfully!");
+      reset();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create category",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      toast.error("Failed to add category");
+      console.error("Add category error:", error);
     }
   };
 
-  // Sample parent categories for dropdown
-  const parentCategories = [
-    { id: "1", name: "Rings" },
-    { id: "2", name: "Necklaces" },
-    { id: "3", name: "Bracelets" },
-    { id: "4", name: "Earrings" },
-  ];
-
-  console.log("About to render AddCategory");
-  
   return (
     <Layout>
-      <div className="space-y-6">
-        <h1>Add Category Page Test</h1>
-        <p>If you can see this, the component is working</p>
-        
-        {/* Header */}
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header Section */}
         <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => navigate("/categories")}
             className="gap-2"
           >
@@ -95,13 +121,13 @@ const AddCategory = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">Add New Category</h1>
-              <p className="text-muted-foreground">Create a new jewelry category</p>
+              <p className="text-muted-foreground">Create a new product category</p>
             </div>
           </div>
         </div>
 
-        {/* Form */}
-        <Card>
+        {/* Category Form Card */}
+        <Card className="max-w-2xl">
           <CardHeader>
             <CardTitle>Category Details</CardTitle>
             <CardDescription>
@@ -109,81 +135,47 @@ const AddCategory = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Category Name */}
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Gold Chains" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Parent Category */}
-                  <FormField
-                    control={form.control}
-                    name="parentId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Parent Category</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select parent category (optional)" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="none">No Parent (Top Level)</SelectItem>
-                            {parentCategories.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Description */}
+            <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Name Field */}
                 <FormField
-                  control={form.control}
-                  name="description"
+                  control={control}
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Brief description of this category..."
-                          className="min-h-[100px]"
-                          {...field}
-                        />
-                      </FormControl>
+                      <FormLabel>Name *</FormLabel>
+                      <Input {...field} placeholder="e.g. Gold Chains" />
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {/* Status */}
+                {/* Description Field */}
                 <FormField
-                  control={form.control}
-                  name="status"
+                  control={control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <Textarea
+                        {...field}
+                        placeholder="Category description (optional)"
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Active Switch */}
+                <FormField
+                  control={control}
+                  name="active"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">Active Status</FormLabel>
                         <div className="text-sm text-muted-foreground">
-                          Enable this category to be visible in the system
+                          Enable or disable category visibility
                         </div>
                       </div>
                       <FormControl>
@@ -192,26 +184,49 @@ const AddCategory = () => {
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {/* Submit Buttons */}
+                {/* Parent Category Dropdown */}
+                <FormField
+                  control={control}
+                  name="parentId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Parent Category (optional)</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value?.toString() || ""}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select parent category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none-parent">None</SelectItem>
+                          {Array.isArray(parentCategories) &&
+                            parentCategories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id.toString()}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Submit Button */}
                 <div className="flex justify-end gap-4 pt-6">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => navigate("/categories")}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isLoading} className="gap-2">
+                  <Button type="submit" disabled={isSubmitting} className="gap-2">
                     <Save className="h-4 w-4" />
-                    {isLoading ? "Creating..." : "Create Category"}
+                    {isSubmitting ? "Adding..." : "Add Category"}
                   </Button>
                 </div>
               </form>
-            </Form>
+            </FormProvider>
           </CardContent>
         </Card>
       </div>

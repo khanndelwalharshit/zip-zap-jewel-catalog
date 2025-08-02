@@ -1,89 +1,39 @@
 import Layout from "@/components/layout/Layout";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FolderTree, Plus, Edit, Trash2, Eye, ChevronRight } from "lucide-react";
+import { categoryService } from "@/services/categoryService";
 
 const Categories = () => {
   const navigate = useNavigate();
-  const categories = [
-    {
-      id: 1,
-      name: "Rings",
-      description: "All types of rings for various occasions",
-      parentId: null,
-      level: 0,
-      status: "active",
-      subcategories: 8,
-      products: 324
-    },
-    {
-      id: 2,
-      name: "Engagement Rings",
-      description: "Beautiful engagement rings with diamonds",
-      parentId: 1,
-      level: 1,
-      status: "active",
-      subcategories: 3,
-      products: 145
-    },
-    {
-      id: 3,
-      name: "Solitaire Rings",
-      description: "Classic solitaire diamond rings",
-      parentId: 2,
-      level: 2,
-      status: "active", 
-      subcategories: 0,
-      products: 67
-    },
-    {
-      id: 4,
-      name: "Necklaces",
-      description: "Elegant necklaces in gold and silver",
-      parentId: null,
-      level: 0,
-      status: "active",
-      subcategories: 12,
-      products: 542
-    },
-    {
-      id: 5,
-      name: "Gold Necklaces",
-      description: "Traditional and modern gold necklaces",
-      parentId: 4,
-      level: 1,
-      status: "active",
-      subcategories: 5,
-      products: 289
-    },
-    {
-      id: 6,
-      name: "22K Gold Necklaces",
-      description: "Premium 22 karat gold necklaces",
-      parentId: 5,
-      level: 2,
-      status: "active",
-      subcategories: 0,
-      products: 156
-    },
-    {
-      id: 7,
-      name: "Bracelets",
-      description: "Stylish bracelets for all occasions",
-      parentId: null,
-      level: 0,
-      status: "inactive",
-      subcategories: 6,
-      products: 198
-    }
-  ];
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const getIndentation = (level: number) => {
-    return level * 20;
-  };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await categoryService.getAll();
+        setCategories(res.data || []);
+      } catch (error) {
+        console.error("Error fetching categories", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const getIndentation = (level: number) => level * 20;
+
+  const totalCategories = categories.length;
+  const parentCategories = categories.filter(c => c.level === 0).length;
+  const activeCategories = categories.filter(c => c.active).length;
+  const maxDepth = categories.reduce((max, category) => Math.max(max, category.level), 0);
 
   return (
     <Layout>
@@ -94,10 +44,7 @@ const Categories = () => {
             <h1 className="text-3xl font-bold text-foreground">Categories</h1>
             <p className="text-muted-foreground">Manage product categories with n-level nesting support</p>
           </div>
-          <Button 
-            className="bg-gradient-primary"
-            onClick={() => navigate("/categories/add")}
-          >
+          <Button className="bg-gradient-primary" onClick={() => navigate("/categories/add")}>
             <Plus className="h-4 w-4 mr-2" />
             Add Category
           </Button>
@@ -111,7 +58,7 @@ const Categories = () => {
               <FolderTree className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">24</div>
+              <div className="text-2xl font-bold">{totalCategories}</div>
               <p className="text-xs text-muted-foreground">All levels included</p>
             </CardContent>
           </Card>
@@ -122,7 +69,7 @@ const Categories = () => {
               <FolderTree className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">8</div>
+              <div className="text-2xl font-bold">{parentCategories}</div>
               <p className="text-xs text-muted-foreground">Top level categories</p>
             </CardContent>
           </Card>
@@ -133,7 +80,7 @@ const Categories = () => {
               <Eye className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">22</div>
+              <div className="text-2xl font-bold">{activeCategories}</div>
               <p className="text-xs text-muted-foreground">Visible in catalogs</p>
             </CardContent>
           </Card>
@@ -144,7 +91,7 @@ const Categories = () => {
               <ChevronRight className="h-4 w-4 text-gold" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">4</div>
+              <div className="text-2xl font-bold">{maxDepth}</div>
               <p className="text-xs text-muted-foreground">Nesting levels</p>
             </CardContent>
           </Card>
@@ -170,45 +117,55 @@ const Categories = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell>
-                      <div 
-                        className="flex items-center font-medium"
-                        style={{ paddingLeft: getIndentation(category.level) }}
-                      >
-                        {category.level > 0 && (
-                          <ChevronRight className="h-4 w-4 text-muted-foreground mr-1" />
-                        )}
-                        {category.name}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{category.description}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">Level {category.level}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={category.status === "active" ? "default" : "secondary"}>
-                        {category.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{category.subcategories}</TableCell>
-                    <TableCell>{category.products}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="outline">
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7}>Loading categories...</TableCell>
                   </TableRow>
-                ))}
+                ) : categories.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7}>No categories found.</TableCell>
+                  </TableRow>
+                ) : (
+                  categories.map((category) => (
+                    <TableRow key={category.id}>
+                      <TableCell>
+                        <div
+                          className="flex items-center font-medium"
+                          style={{ paddingLeft: getIndentation(category.level) }}
+                        >
+                          {category.level > 0 && (
+                            <ChevronRight className="h-4 w-4 text-muted-foreground mr-1" />
+                          )}
+                          {category.name}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{category.description}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">Level {category.level}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={category.status === "active" ? "default" : "secondary"}>
+                          {category.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{category.subcategories ?? 0}</TableCell>
+                      <TableCell>{category.products ?? 0}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="outline">
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>

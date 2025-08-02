@@ -1,3 +1,4 @@
+
 import Layout from "@/components/layout/Layout";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,76 +6,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Package, Plus, Edit, Trash2, Eye, Star, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import { productService } from "@/services/productService";
 
 const Products = () => {
   const navigate = useNavigate();
-  const products = [
-    {
-      id: 1,
-      name: "Classic Diamond Solitaire Ring",
-      shortDescription: "Elegant 1-carat diamond solitaire",
-      longDescription: "A timeless 1-carat round cut diamond set in platinum band with exceptional clarity and color grading",
-      basePrice: 125000,
-      offerPercent: 15,
-      categoryId: 3,
-      categoryName: "Solitaire Rings",
-      status: "active",
-      createdAt: "2024-01-15",
-      inCatalogs: 12
-    },
-    {
-      id: 2,
-      name: "22K Gold Traditional Necklace",
-      shortDescription: "Handcrafted traditional gold necklace",
-      longDescription: "Beautiful 22-karat gold necklace featuring traditional Indian motifs with intricate craftsmanship",
-      basePrice: 85000,
-      offerPercent: 10,
-      categoryId: 6,
-      categoryName: "22K Gold Necklaces",
-      status: "active", 
-      createdAt: "2024-02-20",
-      inCatalogs: 8
-    },
-    {
-      id: 3,
-      name: "Pearl Drop Earrings",
-      shortDescription: "Elegant freshwater pearl earrings",
-      longDescription: "Sophisticated freshwater pearl drop earrings with sterling silver setting, perfect for formal occasions",
-      basePrice: 12500,
-      offerPercent: 20,
-      categoryId: 8,
-      categoryName: "Pearl Earrings",
-      status: "active",
-      createdAt: "2024-03-10",
-      inCatalogs: 15
-    },
-    {
-      id: 4,
-      name: "Platinum Wedding Band",
-      shortDescription: "Premium platinum wedding ring",
-      longDescription: "Sophisticated platinum wedding band with brushed finish and comfort fit design for everyday wear",
-      basePrice: 45000,
-      offerPercent: 0,
-      categoryId: 2,
-      categoryName: "Wedding Rings",
-      status: "inactive",
-      createdAt: "2024-03-25",
-      inCatalogs: 3
-    },
-    {
-      id: 5,
-      name: "Emerald Tennis Bracelet",
-      shortDescription: "Stunning emerald tennis bracelet",
-      longDescription: "Luxury tennis bracelet featuring genuine emeralds set in 18k white gold with secure clasp mechanism",
-      basePrice: 185000,
-      offerPercent: 25,
-      categoryId: 7,
-      categoryName: "Bracelets",
-      status: "active",
-      createdAt: "2024-04-05",
-      inCatalogs: 6
-    }
-  ];
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await productService.getAll();
+        setProducts(res.data || []);
+      } catch (err: any) {
+        setError(err?.message || "Failed to fetch products");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const calculateFinalPrice = (basePrice: number, offerPercent: number) => {
     return basePrice - (basePrice * offerPercent / 100);

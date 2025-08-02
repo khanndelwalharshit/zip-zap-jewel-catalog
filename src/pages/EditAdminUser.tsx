@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, UserCog } from "lucide-react";
+
 import { useToast } from "@/hooks/use-toast";
+import { userService } from "@/services/userService";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -26,36 +28,91 @@ const EditAdminUser = () => {
   const { id } = useParams();
   const { toast } = useToast();
 
-  // Mock data - in real app this would come from API
-  const mockUser = {
-    id: 1,
-    fullName: "Rajesh Kumar",
-    email: "rajesh@zipzag.com",
-    phone: "+91 98765 43210",
-    role: "super-admin" as const,
-    status: "active" as const,
-  };
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: mockUser,
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      role: "sub-admin",
+      status: "active",
+    },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log("Updated admin user:", values);
-    toast({
-      title: "Admin User Updated",
-      description: "The admin user has been successfully updated.",
-    });
-    navigate("/admin-users");
+  useEffect(() => {
+    const fetchUser = async () => {
+      setIsDataLoading(true);
+      setError(null);
+      try {
+        if (!id) throw new Error("No user ID provided");
+        const res = await userService.getById(Number(id));
+        const user = res.data;
+        form.reset({
+          fullName: user.name || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          role: user.role || "sub-admin",
+          status: user.active !== false ? "active" : "inactive",
+        });
+      } catch (err: any) {
+        setError(err?.message || "Failed to load user data");
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
+    fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (!id) throw new Error("No user ID provided");
+      const payload = {
+        name: values.fullName,
+        email: values.email,
+        phone: values.phone,
+        role: values.role,
+        active: values.status === "active",
+      };
+      await userService.update(Number(id), payload);
+      toast({
+        title: "Admin User Updated",
+        description: "The admin user has been successfully updated.",
+      });
+      navigate("/admin-users");
+    } catch (err: any) {
+      setError(err?.message || "Failed to update user");
+      toast({
+        title: "Error",
+        description: err?.message || "Failed to update user",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (isDataLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[300px]">Loading user data...</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate("/admin-users")}>
+          <Button variant="outline" size="sm" onClick={() => navigate("/admin-users")}> 
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -73,6 +130,7 @@ const EditAdminUser = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {error && <div className="text-red-500 mb-2">{error}</div>}
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
@@ -162,10 +220,10 @@ const EditAdminUser = () => {
                 />
 
                 <div className="flex gap-4">
-                  <Button type="submit" className="bg-gradient-primary">
-                    Update Admin User
+                  <Button type="submit" className="bg-gradient-primary" disabled={isLoading}>
+                    {isLoading ? "Updating..." : "Update Admin User"}
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => navigate("/admin-users")}>
+                  <Button type="button" variant="outline" onClick={() => navigate("/admin-users")}> 
                     Cancel
                   </Button>
                 </div>
@@ -176,6 +234,6 @@ const EditAdminUser = () => {
       </div>
     </Layout>
   );
-};
+}
 
 export default EditAdminUser;

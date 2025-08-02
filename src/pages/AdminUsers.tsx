@@ -1,4 +1,6 @@
+
 import { useNavigate } from "react-router-dom";
+
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,47 +9,56 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { UserCog, Plus, Edit, Trash2, Shield, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
+import { userService } from "@/services/userService";
 
 const AdminUsers = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleDeleteUser = (userId: number, userName: string) => {
-    console.log("Deleting user:", userId);
-    toast({
-      title: "Admin User Deleted",
-      description: `${userName} has been successfully deleted.`,
-    });
-  };
-  const adminUsers = [
-    {
-      id: 1,
-      fullName: "Rajesh Kumar",
-      email: "rajesh@zipzag.com",
-      phone: "+91 98765 43210",
-      role: "super-admin",
-      status: "active",
-      createdAt: "2024-01-15"
-    },
-    {
-      id: 2,
-      fullName: "Priya Sharma",
-      email: "priya@zipzag.com", 
-      phone: "+91 87654 32109",
-      role: "sub-admin",
-      status: "active",
-      createdAt: "2024-02-20"
-    },
-    {
-      id: 3,
-      fullName: "Amit Patel",
-      email: "amit@zipzag.com",
-      phone: "+91 76543 21098", 
-      role: "sub-admin",
-      status: "inactive",
-      createdAt: "2024-03-10"
+
+  const [adminUsers, setAdminUsers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [deleteLoadingId, setDeleteLoadingId] = useState<number | null>(null);
+
+  const fetchUsers = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await userService.getAll();
+      setAdminUsers(res.data || []);
+    } catch (err: any) {
+      setError(err?.message || "Failed to fetch users");
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleDeleteUser = async (userId: number, userName: string) => {
+    setDeleteLoadingId(userId);
+    try {
+      await userService.delete(userId);
+      toast({
+        title: "Admin User Deleted",
+        description: `${userName} has been successfully deleted.`,
+      });
+      fetchUsers();
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err?.message || "Failed to delete user",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteLoadingId(null);
+    }
+  };
+
 
   const getRoleIcon = (role: string) => {
     return role === "super-admin" ? <Crown className="h-4 w-4" /> : <Shield className="h-4 w-4" />;
@@ -56,6 +67,13 @@ const AdminUsers = () => {
   const getRoleBadge = (role: string) => {
     return role === "super-admin" ? "destructive" : "secondary";
   };
+
+  // Stats
+  const totalAdmins = adminUsers.length;
+  const superAdmins = adminUsers.filter(u => u.role === "super-admin").length;
+  const subAdmins = adminUsers.filter(u => u.role === "sub-admin").length;
+  const activeAdmins = adminUsers.filter(u => u.active !== false).length;
+  const inactiveAdmins = totalAdmins - activeAdmins;
 
   return (
     <Layout>
@@ -80,8 +98,8 @@ const AdminUsers = () => {
               <UserCog className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">5</div>
-              <p className="text-xs text-muted-foreground">3 active, 2 inactive</p>
+              <div className="text-2xl font-bold">{isLoading ? "-" : totalAdmins}</div>
+              <p className="text-xs text-muted-foreground">{activeAdmins} active, {inactiveAdmins} inactive</p>
             </CardContent>
           </Card>
 
@@ -91,7 +109,7 @@ const AdminUsers = () => {
               <Crown className="h-4 w-4 text-gold" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">2</div>
+              <div className="text-2xl font-bold">{isLoading ? "-" : superAdmins}</div>
               <p className="text-xs text-muted-foreground">Full system access</p>
             </CardContent>
           </Card>
@@ -102,7 +120,7 @@ const AdminUsers = () => {
               <Shield className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">3</div>
+              <div className="text-2xl font-bold">{isLoading ? "-" : subAdmins}</div>
               <p className="text-xs text-muted-foreground">Limited access</p>
             </CardContent>
           </Card>
@@ -115,10 +133,11 @@ const AdminUsers = () => {
             <CardDescription>Manage administrator accounts and their access levels</CardDescription>
           </CardHeader>
           <CardContent>
+            {error && <div className="text-red-500 mb-2">{error}</div>}
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Full Name</TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Role</TableHead>
@@ -128,57 +147,71 @@ const AdminUsers = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {adminUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.fullName}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.phone}</TableCell>
-                    <TableCell>
-                      <Badge variant={getRoleBadge(user.role)} className="flex items-center gap-1 w-fit">
-                        {getRoleIcon(user.role)}
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.status === "active" ? "default" : "secondary"}>
-                        {user.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{user.createdAt}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => navigate(`/admin-users/edit/${user.id}`)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Admin User</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{user.fullName}"? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteUser(user.id, user.fullName)}>
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center">Loading...</TableCell>
                   </TableRow>
-                ))}
+                ) : adminUsers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center">No admin users found.</TableCell>
+                  </TableRow>
+                ) : (
+                  adminUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.phone}</TableCell>
+                      <TableCell>
+                        <Badge variant={getRoleBadge(user.role)} className="flex items-center gap-1 w-fit">
+                          {getRoleIcon(user.role)}
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.active !== false ? "default" : "secondary"}>
+                          {user.active !== false ? "active" : "inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => navigate(`/admin-users/edit/${user.id}`)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="outline" disabled={deleteLoadingId === user.id}>
+                                {deleteLoadingId === user.id ? (
+                                  <span className="animate-spin"><Trash2 className="h-4 w-4" /></span>
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Admin User</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{user.name}"? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteUser(user.id, user.name)} disabled={deleteLoadingId === user.id}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>

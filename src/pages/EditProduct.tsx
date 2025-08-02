@@ -14,6 +14,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import Layout from "@/components/layout/Layout";
+import { categoryService } from "@/services/categoryService";
+import { productService } from "@/services/productService";
 
 const formSchema = z.object({
   name: z.string().min(2, "Product name must be at least 2 characters"),
@@ -37,6 +39,7 @@ const EditProduct = () => {
     "/placeholder.svg",
     "/placeholder.svg"
   ]);
+  const [categories, setCategories] = useState<any[]>([]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -53,27 +56,29 @@ const EditProduct = () => {
 
   // Load product data
   useEffect(() => {
-    const loadProduct = async () => {
+    const loadData = async () => {
       try {
-        // Simulate API call to load product data
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Sample data - in real app this would come from API
-        const productData = {
-          name: "22K Gold Diamond Bracelet",
-          shortDescription: "Elegant bracelet with premium diamonds",
-          longDescription: "Handcrafted 22K gold bracelet featuring premium diamonds in a traditional design. Perfect for special occasions and festivals. Each piece is carefully crafted by skilled artisans.",
-          basePrice: 75000,
-          offerPercentage: 15,
-          categoryId: "3",
-          status: true,
-        };
-        
-        form.reset(productData);
+        const [productRes, categoriesRes] = await Promise.all([
+          productService.getById(Number(id)),
+          categoryService.getAll(),
+        ]);
+
+        const productData = productRes.data;
+        setCategories(categoriesRes.data || []);
+
+        form.reset({
+          name: productData.name,
+          shortDescription: productData.shortDescription || "",
+          longDescription: productData.description || "",
+          basePrice: productData.price,
+          offerPercentage: productData.offerPercentage || 0,
+          categoryId: productData.categoryId.toString(),
+          status: productData.active,
+        });
       } catch (error) {
         toast({
           title: "Error",
-          description: "Failed to load product data",
+          description: "Failed to load product data or categories",
           variant: "destructive",
         });
       } finally {
@@ -81,14 +86,25 @@ const EditProduct = () => {
       }
     };
 
-    loadProduct();
+    if (id) loadData();
   }, [id, form, toast]);
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!id) return;
+
+      const payload = {
+        name: data.name,
+        shortDescription: data.shortDescription,
+        description: data.longDescription,
+        basePrice: data.basePrice,
+        offerPercentage: data.offerPercentage || 0,
+        categoryId: parseInt(data.categoryId),
+        active: data.status,
+      };
+
+      await productService.update(Number(id), payload);
       
       toast({
         title: "Success",
@@ -96,25 +112,16 @@ const EditProduct = () => {
       });
       
       navigate("/products");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update product",
+        description: error?.message || "Failed to update product",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Sample categories for dropdown
-  const categories = [
-    { id: "1", name: "Rings" },
-    { id: "2", name: "Necklaces" },
-    { id: "3", name: "Bracelets" },
-    { id: "4", name: "Earrings" },
-    { id: "5", name: "Pendants" },
-  ];
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;

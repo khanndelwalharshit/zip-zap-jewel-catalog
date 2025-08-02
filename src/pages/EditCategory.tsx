@@ -4,22 +4,44 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ArrowLeft, Save, FolderTree } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
 import Layout from "@/components/layout/Layout";
+import { categoryService } from "@/services/categoryService";
 
 const formSchema = z.object({
   name: z.string().min(2, "Category name must be at least 2 characters"),
   description: z.string().optional(),
-  parentId: z.string().optional(),
-  status: z.boolean().default(true),
+  parentId: z.union([z.string(), z.literal("")]).transform((val) =>
+    val === "" ? null : Number(val)
+  ),
+  active: z.boolean().default(true),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -30,37 +52,37 @@ const EditCategory = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [parentCategories, setParentCategories] = useState<
+    { id: number; name: string }[]
+  >([]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
-      parentId: "",
-      status: true,
+      parentId: null,
+      active: true,
     },
   });
 
-  // Load category data
+  // Load existing category details
   useEffect(() => {
     const loadCategory = async () => {
       try {
-        // Simulate API call to load category data
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Sample data - in real app this would come from API
-        const categoryData = {
-          name: "Gold Bracelets",
-          description: "Premium collection of gold bracelets in various designs",
-          parentId: "3",
-          status: true,
-        };
-        
-        form.reset(categoryData);
-      } catch (error) {
+        const res = await categoryService.getById(Number(id));
+        const data = res.data;
+
+        form.reset({
+          name: data.name,
+          description: data.description || "",
+          parentId: data.parentId?.toString() || "",
+          active: data.active ?? true,
+        });
+      } catch (err: any) {
         toast({
           title: "Error",
-          description: "Failed to load category data",
+          description: err?.message || "Failed to load category",
           variant: "destructive",
         });
       } finally {
@@ -68,25 +90,44 @@ const EditCategory = () => {
       }
     };
 
-    loadCategory();
+    if (id) loadCategory();
   }, [id, form, toast]);
+
+  // Load real parent categories
+  useEffect(() => {
+    const loadParents = async () => {
+      try {
+        const res = await categoryService.getAll();
+        setParentCategories(res.data || []);
+      } catch (error) {
+        console.error("Failed to load parent categories", error);
+      }
+    };
+
+    loadParents();
+  }, []);
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      const payload = {
+        name: data.name,
+        description: data.description,
+        active: data.active,
+        parentId: data.parentId,
+      };
+
+      await categoryService.update(Number(id), payload);
+
       toast({
         title: "Success",
-        description: "Category updated successfully",
+        description: "Category updated",
       });
-      
       navigate("/categories");
-    } catch (error) {
+    } catch (err: any) {
       toast({
         title: "Error",
-        description: "Failed to update category",
+        description: err?.message || "Failed to update category",
         variant: "destructive",
       });
     } finally {
@@ -94,63 +135,19 @@ const EditCategory = () => {
     }
   };
 
-  // Sample parent categories for dropdown
-  const parentCategories = [
-    { id: "1", name: "Rings" },
-    { id: "2", name: "Necklaces" },
-    { id: "3", name: "Bracelets" },
-    { id: "4", name: "Earrings" },
-  ];
-
   if (isDataLoading) {
     return (
-      <Layout>
-        <div className="container mx-auto p-6 space-y-6">
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-9 w-32" />
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-10 w-10 rounded-lg" />
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-64" />
-              </div>
-            </div>
-          </div>
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-4 w-80" />
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-24 w-full" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </Layout>
+      <div className="p-6 text-muted-foreground text-sm">Loading category...</div>
     );
   }
 
   return (
     <Layout>
       <div className="container mx-auto p-6 space-y-6">
-        {/* Header */}
         <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => navigate("/categories")}
             className="gap-2"
           >
@@ -163,24 +160,23 @@ const EditCategory = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">Edit Category</h1>
-              <p className="text-muted-foreground">Update category information</p>
+              <p className="text-muted-foreground">
+                Modify an existing jewelry category
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Form */}
         <Card>
           <CardHeader>
             <CardTitle>Category Details</CardTitle>
-            <CardDescription>
-              Update the information below to modify the category
-            </CardDescription>
+            <CardDescription>Update the category below</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Category Name */}
+                  {/* Name */}
                   <FormField
                     control={form.control}
                     name="name"
@@ -202,19 +198,24 @@ const EditCategory = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Parent Category</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          value={field.value === null ? "none-parent" : field.value?.toString()}
+                          onValueChange={field.onChange}
+                        >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select parent category (optional)" />
+                              <SelectValue placeholder="Select parent category" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">No Parent (Top Level)</SelectItem>
-                            {parentCategories.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
+                            <SelectItem value="none-parent">No Parent</SelectItem>
+                            {parentCategories
+                              .filter((cat) => String(cat.id) !== id) // avoid selecting self
+                              .map((cat) => (
+                                <SelectItem key={cat.id} value={cat.id.toString()}>
+                                  {cat.name}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -231,8 +232,8 @@ const EditCategory = () => {
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Brief description of this category..."
+                        <Textarea
+                          placeholder="Brief description..."
                           className="min-h-[100px]"
                           {...field}
                         />
@@ -242,16 +243,16 @@ const EditCategory = () => {
                   )}
                 />
 
-                {/* Status */}
+                {/* Active */}
                 <FormField
                   control={form.control}
-                  name="status"
+                  name="active"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">Active Status</FormLabel>
                         <div className="text-sm text-muted-foreground">
-                          Enable this category to be visible in the system
+                          Enable or disable category visibility
                         </div>
                       </div>
                       <FormControl>
@@ -264,13 +265,9 @@ const EditCategory = () => {
                   )}
                 />
 
-                {/* Submit Buttons */}
+                {/* Buttons */}
                 <div className="flex justify-end gap-4 pt-6">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => navigate("/categories")}
-                  >
+                  <Button variant="outline" onClick={() => navigate("/categories")}>
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isLoading} className="gap-2">

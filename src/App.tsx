@@ -14,6 +14,7 @@ import Products from "./pages/Products";
 import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
 import Customers from "./pages/Customers";
+import AddCustomer from "./pages/AddCustomer";
 import Catalogs from "./pages/Catalogs";
 import AddCatalog from "./pages/AddCatalog";
 import EditCatalog from "./pages/EditCatalog";
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/products/add" element={<AddProduct />} />
           <Route path="/products/edit/:id" element={<EditProduct />} />
           <Route path="/customers" element={<Customers />} />
+          <Route path="/customers/add" element={<AddCustomer />} />
           <Route path="/catalogs" element={<Catalogs />} />
           <Route path="/catalogs/add" element={<AddCatalog />} />
           <Route path="/catalogs/edit/:id" element={<EditCatalog />} />
