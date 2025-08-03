@@ -1,4 +1,4 @@
-import Layout from "@/components/layout/Layout";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,12 +21,44 @@ import jewelryCollection from "@/assets/jewelry-collection.jpg";
 import goldBracelet from "@/assets/gold-bracelet.jpg";
 import diamondRing from "@/assets/diamond-ring.jpg";
 import pearlNecklace from "@/assets/pearl-necklace.jpg";
+import { customerService } from "@/services/customerService";
+import { productService } from "@/services/productService";
+import { catalogService } from "@/services/catalogService";
+import { inquiryService } from "@/services/inquiryService";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
+  const [customerCount, setCustomerCount] = useState(0);
+  const [productCount, setProductCount] = useState(0);
+  const [catalogCount, setCatalogCount] = useState(0);
+  const [inquiryCount, setInquiryCount] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const customers = await customerService.getAll();
+        setCustomerCount(customers.data.length);
+
+        const products = await productService.getAll();
+        setProductCount(products.data.length);
+
+        const catalogs = await catalogService.getAll();
+        setCatalogCount(catalogs.data.length);
+
+        const inquiries = await inquiryService.getAll();
+        setInquiryCount(inquiries.data.length);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const stats = [
     {
       title: "Total Customers",
-      value: "1,847",
+      value: customerCount,
       change: "+18%",
       icon: Users,
       color: "text-primary",
@@ -34,7 +66,7 @@ const Dashboard = () => {
     },
     {
       title: "Active Products",
-      value: "2,456",
+      value: productCount,
       change: "+12%", 
       icon: Package,
       color: "text-success",
@@ -42,7 +74,7 @@ const Dashboard = () => {
     },
     {
       title: "Live Catalogs",
-      value: "156",
+      value: catalogCount,
       change: "+24%",
       icon: BookOpen,
       color: "text-gold",
@@ -50,7 +82,7 @@ const Dashboard = () => {
     },
     {
       title: "Pending Inquiries",
-      value: "47",
+      value: inquiryCount,
       change: "+8%",
       icon: MessageSquare,
       color: "text-warning",
@@ -154,10 +186,12 @@ const Dashboard = () => {
             </div>
             <p className="text-xl opacity-90 mb-6">Premium Jewelry Catalog Management Platform</p>
             <div className="flex gap-4">
-              <Button variant="gold" size="lg">
-                <Star className="mr-2 h-5 w-5" />
-                Create New Catalog
-              </Button>
+              <Link to="/catalogs/add">
+                <Button variant="gold" size="lg">
+                  <Star className="mr-2 h-5 w-5" />
+                  Create New Catalog
+                </Button>
+              </Link>
               <Button variant="outline" size="lg" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                 <TrendingUp className="mr-2 h-5 w-5" />
                 View Analytics
@@ -200,22 +234,30 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="premium" className="w-full justify-start" size="sm">
-              <FolderTree className="mr-2 h-4 w-4" />
-              Manage Categories
-            </Button>
-            <Button variant="outline" className="w-full justify-start" size="sm">
-              <Package className="mr-2 h-4 w-4" />
-              Add New Product
-            </Button>
-            <Button variant="outline" className="w-full justify-start" size="sm">
-              <Users className="mr-2 h-4 w-4" />
-              Customer Management
-            </Button>
-            <Button variant="gold" className="w-full justify-start" size="sm">
-              <BookOpen className="mr-2 h-4 w-4" />
-              Create Catalog
-            </Button>
+            <Link to="/categories">
+              <Button variant="premium" className="w-full justify-start" size="sm">
+                <FolderTree className="mr-2 h-4 w-4" />
+                Manage Categories
+              </Button>
+            </Link>
+            <Link to="/products/add">
+              <Button variant="outline" className="w-full justify-start" size="sm">
+                <Package className="mr-2 h-4 w-4" />
+                Add New Product
+              </Button>
+            </Link>
+            <Link to="/customers">
+              <Button variant="outline" className="w-full justify-start" size="sm">
+                <Users className="mr-2 h-4 w-4" />
+                Customer Management
+              </Button>
+            </Link>
+            <Link to="/catalogs/add">
+              <Button variant="gold" className="w-full justify-start" size="sm">
+                <BookOpen className="mr-2 h-4 w-4" />
+                Create Catalog
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
@@ -278,7 +320,7 @@ const Dashboard = () => {
               className="w-full h-48 object-cover rounded-lg mb-4"
             />
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-.tsx-between text-sm">
                 <span className="text-muted-foreground">Categories</span>
                 <span className="font-medium">24</span>
               </div>
